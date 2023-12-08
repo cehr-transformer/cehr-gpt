@@ -3,7 +3,6 @@ import config.parameters as p
 from config.grid_search_config import LEARNING_RATE, LSTM_DIRECTION, LSTM_UNIT
 from evaluations.evaluation_parameters import *
 from evaluations.evaluation_parse_args import create_evaluation_args
-from evaluations.model_evaluators.hierarchical_bert_evaluators import *
 from evaluations.model_evaluators.bert_model_evaluators import *
 from evaluations.model_evaluators.sequence_model_evaluators import *
 from evaluations.model_evaluators.frequency_model_evaluators import *
@@ -194,113 +193,6 @@ def evaluate_sequence_models(args):
             grid_search_config=grid_search_config,
             is_chronological_test=args.is_chronological_test,
             freeze_pretrained_model=args.freeze_pretrained_model,
-            k_fold_test=args.k_fold_test,
-            multiple_test_run=args.multiple_test_run
-        ).eval_model()
-
-    if HIERARCHICAL_BERT_LSTM in args.model_evaluators:
-        validate_folder(args.vanilla_bert_model_folder)
-        bert_model_path = os.path.join(args.vanilla_bert_model_folder,
-                                       p.bert_model_validation_path)
-        bert_tokenizer_path = os.path.join(args.vanilla_bert_model_folder,
-                                           p.tokenizer_path)
-        bert_visit_tokenizer_path = os.path.join(
-            args.vanilla_bert_model_folder,
-            p.visit_tokenizer_path
-        )
-        HierarchicalBertEvaluator(
-            dataset=dataset,
-            evaluation_folder=args.evaluation_folder,
-            num_of_folds=args.num_of_folds,
-            is_transfer_learning=args.is_transfer_learning,
-            training_percentage=args.training_percentage,
-            max_num_of_visits=args.max_num_of_visits,
-            max_num_of_concepts=args.max_num_of_concepts,
-            batch_size=args.batch_size,
-            epochs=args.epochs,
-            bert_model_path=bert_model_path,
-            tokenizer_path=bert_tokenizer_path,
-            visit_tokenizer_path=bert_visit_tokenizer_path,
-            sequence_model_name=args.sequence_model_name,
-            learning_rate=args.learning_rate,
-            cross_validation_test=args.cross_validation_test,
-            grid_search_config=grid_search_config,
-            include_att_tokens=args.include_att_tokens,
-            is_chronological_test=args.is_chronological_test,
-            freeze_pretrained_model=args.freeze_pretrained_model,
-            k_fold_test=args.k_fold_test,
-            multiple_test_run=args.multiple_test_run
-        ).eval_model()
-
-    if HIERARCHICAL_BERT_POOLING in args.model_evaluators:
-        validate_folder(args.vanilla_bert_model_folder)
-        bert_model_path = os.path.join(args.vanilla_bert_model_folder,
-                                       p.bert_model_validation_path)
-        bert_tokenizer_path = os.path.join(args.vanilla_bert_model_folder,
-                                           p.tokenizer_path)
-        bert_visit_tokenizer_path = os.path.join(
-            args.vanilla_bert_model_folder,
-            p.visit_tokenizer_path
-        )
-        HierarchicalBertPoolingEvaluator(
-            dataset=dataset,
-            evaluation_folder=args.evaluation_folder,
-            num_of_folds=args.num_of_folds,
-            is_transfer_learning=args.is_transfer_learning,
-            training_percentage=args.training_percentage,
-            max_num_of_visits=args.max_num_of_visits,
-            max_num_of_concepts=args.max_num_of_concepts,
-            batch_size=args.batch_size,
-            epochs=args.epochs,
-            bert_model_path=bert_model_path,
-            tokenizer_path=bert_tokenizer_path,
-            visit_tokenizer_path=bert_visit_tokenizer_path,
-            sequence_model_name=args.sequence_model_name,
-            learning_rate=args.learning_rate,
-            cross_validation_test=args.cross_validation_test,
-            grid_search_config=grid_search_config,
-            include_att_tokens=args.include_att_tokens,
-            is_chronological_test=args.is_chronological_test,
-            freeze_pretrained_model=args.freeze_pretrained_model,
-            k_fold_test=args.k_fold_test,
-            multiple_test_run=args.multiple_test_run
-        ).eval_model()
-
-    if RANDOM_HIERARCHICAL_BERT_LSTM in args.model_evaluators:
-        validate_folder(args.vanilla_bert_model_folder)
-        bert_model_path = os.path.join(args.vanilla_bert_model_folder,
-                                       p.bert_model_validation_path)
-        bert_tokenizer_path = os.path.join(args.vanilla_bert_model_folder,
-                                           p.tokenizer_path)
-        bert_visit_tokenizer_path = os.path.join(
-            args.vanilla_bert_model_folder,
-            p.visit_tokenizer_path
-        )
-        RandomHierarchicalBertEvaluator(
-            dataset=dataset,
-            evaluation_folder=args.evaluation_folder,
-            num_of_folds=args.num_of_folds,
-            is_transfer_learning=args.is_transfer_learning,
-            training_percentage=args.training_percentage,
-            num_of_exchanges=args.num_of_exchanges,
-            max_num_of_visits=args.max_num_of_visits,
-            max_num_of_concepts=args.max_num_of_concepts,
-            depth=args.depth,
-            num_heads=args.num_heads,
-            use_time_embedding=args.use_time_embedding,
-            time_embeddings_size=args.time_embeddings_size,
-            embedding_size=args.embedding_size,
-            batch_size=args.batch_size,
-            epochs=args.epochs,
-            bert_model_path=bert_model_path,
-            tokenizer_path=bert_tokenizer_path,
-            visit_tokenizer_path=bert_visit_tokenizer_path,
-            sequence_model_name=args.sequence_model_name,
-            learning_rate=args.learning_rate,
-            cross_validation_test=args.cross_validation_test,
-            grid_search_config=grid_search_config,
-            include_att_tokens=args.include_att_tokens,
-            is_chronological_test=args.is_chronological_test,
             k_fold_test=args.k_fold_test,
             multiple_test_run=args.multiple_test_run
         ).eval_model()
