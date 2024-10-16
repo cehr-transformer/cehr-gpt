@@ -1,13 +1,14 @@
-# CEHR-GPT
+# CEHR-GPT for ML4H 2024
 
 This project is the continuation of the CEHR-BERT work, which has been published
-at https://proceedings.mlr.press/v158/pang21a.html.
+at https://proceedings.mlr.press/v158/pang21a.html. 
+A newer version of CEHR-GPT is being developed in Huggingface, and will be released soon. 
 
 ## Getting Started
 
 ### Pre-requisite
 
-The project is built in python 3.7, and project dependency needs to be installed
+The project is built in python 3.10, and project dependency needs to be installed
 
 `pip3 install -r requirements.txt`
 
