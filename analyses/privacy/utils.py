@@ -1,14 +1,32 @@
+import logging
 import numpy as np
+from tqdm import tqdm
 from sklearn.preprocessing import OneHotEncoder
 
-from .patient_index.base_indexer import PatientDataIndex
-from tqdm import tqdm
+LOG = logging.getLogger(__name__)
 
 RANDOM_SEE = 42
 NUM_OF_GENDERS = 3
 NUM_OF_RACES = 21
 
-get_demographics = PatientDataIndex.get_demographics
+
+def get_demographics(
+        concept_ids
+):
+    year_token, age_token, gender, race = concept_ids[0:4]
+    try:
+        year = int(year_token[5:])
+    except ValueError as e:
+        LOG.error(f'{year_token[5:]} cannot be converted to an integer, use the default value 1900')
+        year = 1900
+
+    try:
+        age = int(age_token[4:])
+    except ValueError as e:
+        LOG.error(f'{age_token[4:]} cannot be converted to an integer, use the default value 1900')
+        age = -1
+
+    return year, age, gender, race
 
 
 def create_race_encoder(train_data_sample, evaluation_data_sample, synthetic_data_sample):
@@ -111,7 +129,9 @@ def create_vector_representations_for_attribute(
         common_attributes,
         sensitive_attributes
 ):
-    common_concept_vectors, sensitive_concept_vectors = extract_common_sensitive_concepts(dataset, concept_tokenizer, common_attributes, sensitive_attributes)
+    common_concept_vectors, sensitive_concept_vectors = extract_common_sensitive_concepts(dataset, concept_tokenizer,
+                                                                                          common_attributes,
+                                                                                          sensitive_attributes)
     gender_vectors = gender_encoder.transform(dataset.gender.to_numpy()[:, np.newaxis]).todense()
     race_vectors = race_encoder.transform(dataset.race.to_numpy()[:, np.newaxis]).todense()
     age_vectors = dataset.scaled_age.to_numpy()[:, np.newaxis]
@@ -154,13 +174,14 @@ def batched_pairwise_euclidean_distance_indices(A, B, batch_size):
 
     return min_indices
 
+
 def batched_pairwise_euclidean_distance_indices(A, B, batch_size, self_exclude=False):
     # Initialize arrays to hold the minimum distances and indices for each point in A
     min_distances = np.full((A.shape[0],), np.inf)
     min_indices = np.full((A.shape[0],), -1, dtype=int)
 
     # Iterate over A in batches
-    for i in tqdm(range(0, A.shape[0], batch_size), total=A.shape[0]//batch_size + 1):
+    for i in tqdm(range(0, A.shape[0], batch_size), total=A.shape[0] // batch_size + 1):
         end_i = i + batch_size
         A_batch = A[i:end_i]
 
