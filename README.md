@@ -1,10 +1,3 @@
-<style>
-  pre {
-    white-space: pre-wrap;
-    word-wrap: break-word;
-  }
-</style>
-
 # CEHR-GPT for ML4H 2024
 
 This project is the continuation of the CEHR-BERT work, which has been published
