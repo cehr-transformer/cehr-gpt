@@ -21,6 +21,10 @@ class ConceptTokenizer:
         self.special_tokens = special_tokens
         self.tokenizer = Tokenizer(oov_token=oov_token, filters='', lower=False)
 
+    @property
+    def vocab_size(self):
+        return self.get_vocab_size()
+
     def fit_on_concept_sequences(self, concept_sequences: Union[df_series, dd_series]):
 
         if isinstance(concept_sequences, df_series):
