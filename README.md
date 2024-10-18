@@ -66,28 +66,61 @@ PYTHONPATH=./: python3 tools/omop_converter_batch.py --patient_sequence_path ~/D
 ```
 
 ### Utility Analyses
+#### Co-occurrence Analysis
+Generate the co-occurrence for the training data
+```bash
+PYTHONPATH=./:$PYTHONPATH python analysis/gpt/generate_cooccurrence.py --sequence_data_path ~/Documents/omop_test/cehrgpt/patient_sequence/train --concept_path ~/Documents/omop_test/concept --is_temporal_cooccurrence --data_cooccurrence_path ~/Documents/omop_test/cehrgpt/patient_sequence/train_cooccurrence
+```
+Generate the co-occurrence for the synthetic data
+```bash
+PYTHONPATH=./:$PYTHONPATH python analysis/gpt/generate_cooccurrence.py --sequence_data_path ~/Documents/omop_test/cehrgpt/generated_sequences_top_p95/ --concept_path ~/Documents/omop_test/concept --is_temporal_cooccurrence --data_cooccurrence_path ~/Documents/omop_test/cehrgpt/generated_sequences_top_p95_cooccurrence
+```
+Compute the KL divergence of the two co-occurrence matrices
+```bash
+PYTHONPATH=./:$PYTHONPATH python analysis/gpt/compare_cooccurrence.py --reference_cooccurrence_path ~/Documents/omop_test/cehrgpt/patient_sequence/train --comparison_cooccurrence_path ~/Documents/omop_test/cehrgpt/generated_sequences_top_p95_cooccurrence/
+```
+#### Replicate Predictive Tasks using synthetic data
+```bash
+venv-pack -o pyspark_venv.tar.gz
+```
+##### HF readmission
+```bash
+export OMOP_FOLDER=~/Documents/omop_test/cehrgpt/restored_omop_top_p95/;
+mkdir -p $OMOP_FOLDER/cohorts/hf_readmission;
+mkdir -p $OMOP_FOLDER/evaluation_gpt/hf_readmission/;
+PYTHONPATH=./:$PYTHONPATH spark-submit --archives pyspark_venv.tar.gz#environment  --conf "spark.pyspark.driver.python=python" spark_apps/prediction_cohorts/hf_readmission.py -c hf_readmission_bow  -i $OMOP_FOLDER -o $OMOP_FOLDER/cohorts/hf_readmission -dl 1985-01-01 -du 2023-12-31 -l 18 -u 100 -ow 360 -ps 0 -pw 30 -f --att_type cehr_bert --ehr_table_list condition_occurrence procedure_occurrence drug_exposure -iv;
+PYTHONPATH=./:$PYTHONPATH python3 evaluations/evaluation.py -a baseline_model -d $OMOP_FOLDER/cohorts/hf_readmission/hf_readmission_bow/ -ef $OMOP_FOLDER/evaluation_gpt/hf_readmission/;
+```
 
+##### Hospitalization
+```bash
+export OMOP_FOLDER=~/Documents/omop_test/cehrgpt/restored_omop_top_p95/;
+mkdir -p $OMOP_FOLDER/cohorts/hospitalization;
+mkdir -p $OMOP_FOLDER/evaluation_gpt/hospitalization/;
+PYTHONPATH=./:$PYTHONPATH spark-submit --archives pyspark_venv.tar.gz#environment  --conf "spark.pyspark.driver.python=python" spark_apps/prediction_cohorts/hospitalization.py -c hospitalization_bow -i $OMOP_FOLDER -o $OMOP_FOLDER/cohorts/hospitalization/ -dl 1985-01-01 -du 2023-05-01 -l 18 -u 100 -ow 540 -hw 180 -ps 0 -pw 360 -f -iw --att_type cehr_bert --ehr_table_list condition_occurrence procedure_occurrence drug_exposure -iv;
+PYTHONPATH=./:$PYTHONPATH python3 evaluations/evaluation.py -a baseline_model -d $OMOP_FOLDER/cohorts/hospitalization/hospitalization_bow/ -ef $OMOP_FOLDER/evaluation_gpt/hospitalization/;
+```
 
 ### Privacy Analyses
 Create the folder to store the privacy metrics 
 ``
-mkdir ~/Documents/omop_test/cehrgpt/generated_sequences_top_p95/privacy
+mkdir ~/Documents/omop_test/cehrgpt/privacy
 ``
 #### 1. Attribute Inference Analysis
 ```bash
-PYTHONPATH=./:$PYTHONPATH python analysis/privacy/attribute_inference.py --training_data_folder ~/Documents/omop_test/cehrgpt/patient_sequence/train  --output_folder ~/Documents/omop_test/cehrgpt/generated_sequences_top_p95/privacy --synthetic_data_folder ~/Documents/omop_test/cehrgpt/generated_sequences_top_p95/ --tokenizer_path ~/Documents/omop_test/cehrgpt/model --attribute_config analysis/privacy/attribute_inference_config.yml --n_iterations 10 --num_of_samples 10000
+PYTHONPATH=./:$PYTHONPATH python analysis/privacy/attribute_inference.py --training_data_folder ~/Documents/omop_test/cehrgpt/patient_sequence/train  --output_folder ~/Documents/omop_test/cehrgpt/privacy --synthetic_data_folder ~/Documents/omop_test/cehrgpt/generated_sequences_top_p95/ --tokenizer_path ~/Documents/omop_test/cehrgpt/model --attribute_config analysis/privacy/attribute_inference_config.yml --n_iterations 10 --num_of_samples 10000
 ```
 #### 2. Membership Inference Analysis
 ```bash
-PYTHONPATH=./:$PYTHONPATH python analysis/privacy/member_inference.py --training_data_folder  ~/Documents/omop_test/cehrgpt/patient_sequence/train --evaluation_data_folder  ~/Documents/omop_test/cehrgpt/patient_sequence/test --output_folder ~/Documents/omop_test/cehrgpt/generated_sequences_top_p95/privacy --synthetic_data_folder ~/Documents/omop_test/cehrgpt/generated_sequences_top_p95/ --tokenizer_path ~/Documents/omop_test/cehrgpt/model --n_iterations 10 --num_of_samples 10000
+PYTHONPATH=./:$PYTHONPATH python analysis/privacy/member_inference.py --training_data_folder  ~/Documents/omop_test/cehrgpt/patient_sequence/train --evaluation_data_folder  ~/Documents/omop_test/cehrgpt/patient_sequence/test --output_folder ~/Documents/omop_test/cehrgpt/privacy --synthetic_data_folder ~/Documents/omop_test/cehrgpt/generated_sequences_top_p95/ --tokenizer_path ~/Documents/omop_test/cehrgpt/model --n_iterations 10 --num_of_samples 10000
 ```
 #### 3. Nearest Neighbor Inference Analysis
 ```bash
 mkdir ~/Documents/omop_test/cehrgpt/generated_sequences_top_p95/privacy/nearest_neighbor_inference;
-PYTHONPATH=./:$PYTHONPATH python analysis/privacy/nearest_neighbor_inference.py --training_data_folder ~/Documents/omop_test/cehrgpt/patient_sequence/train --evaluation_data_folder ~/Documents/omop_test/cehrgpt/patient_sequence/test --metrics_folder ~/Documents/omop_test/cehrgpt/generated_sequences_top_p95/privacy/nearest_neighbor_inference --synthetic_data_folder ~/Documents/omop_test/cehrgpt/generated_sequences_top_p95/ --concept_tokenizer_path ~/Documents/omop_test/cehrgpt/model --n_iterations 10 --num_of_samples 10000
+PYTHONPATH=./:$PYTHONPATH python analysis/privacy/nearest_neighbor_inference.py --training_data_folder ~/Documents/omop_test/cehrgpt/patient_sequence/train --evaluation_data_folder ~/Documents/omop_test/cehrgpt/patient_sequence/test --metrics_folder ~/Documents/omop_test/cehrgpt/privacy/nearest_neighbor_inference --synthetic_data_folder ~/Documents/omop_test/cehrgpt/generated_sequences_top_p95/ --concept_tokenizer_path ~/Documents/omop_test/cehrgpt/model --n_iterations 10 --num_of_samples 10000
 ```
 #### 4. Re-identification Risk Inference Analysis
 ```bash
 mkdir ~/Documents/omop_test/cehrgpt/generated_sequences_top_p95/privacy/reid;
-PYTHONPATH=./:$PYTHONPATH python analysis/privacy/reid_inference.py --training_data_folder ~/Documents/omop_test/cehrgpt/patient_sequence/train --evaluation_data_folder ~/Documents/omop_test/cehrgpt/patient_sequence/test --output_folder ~/Documents/omop_test/cehrgpt/generated_sequences_top_p95/privacy/reid --synthetic_data_folder ~/Documents/omop_test/cehrgpt/generated_sequences_top_p95/
+PYTHONPATH=./:$PYTHONPATH python analysis/privacy/reid_inference.py --training_data_folder ~/Documents/omop_test/cehrgpt/patient_sequence/train --evaluation_data_folder ~/Documents/omop_test/cehrgpt/patient_sequence/test --output_folder ~/Documents/omop_test/cehrgpt/privacy/reid --synthetic_data_folder ~/Documents/omop_test/cehrgpt/generated_sequences_top_p95/
 ```
