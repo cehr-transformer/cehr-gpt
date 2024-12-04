@@ -239,6 +239,9 @@ class GptDecoder(tf.keras.layers.Layer):
         return config
 
     def call(self, x, mask, **kwargs):
+        # The reason we are doing this is that tensorflow doesn't seem to recognize the rank correctly
+        batch, length = tf.shape(x)[0], tf.shape(x)[1]
+        x = tf.reshape(x, (batch, -1, self.d_model))
         attention_weights = []
         layer_contexts = []
         for i in range(self.num_layers):

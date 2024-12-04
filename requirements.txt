@@ -5,7 +5,7 @@ evaluate==0.4.1
 fast-ml==3.68
 Jinja2==3.1.3
 networkx==3.2.1
-numpy==1.24.3
+numpy==1.23.5
 packaging==23.2
 pandas==2.2.0
 peft==0.10.0
@@ -16,7 +16,7 @@ python-dateutil==2.8.2
 PyYAML==6.0.1
 scikit-learn==1.4.0
 scipy==1.12.0
-tensorflow==2.15.0
+tensorflow==2.12.0
 tensorflow-metal==1.1.0; sys_platform == 'darwin' # macOS only
 tensorflow-datasets==4.5.2
 tqdm==4.66.1
