@@ -1,4 +1,4 @@
-# CEHR-GPT for ML4H 2024
+# CEHR-GPT
 
 This project is the continuation of the CEHR-BERT work, which has been published
 at https://proceedings.mlr.press/v158/pang21a.html. 
